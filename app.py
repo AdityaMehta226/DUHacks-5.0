@@ -1,97 +1,54 @@
-from flask import Flask, render_template, request, redirect
-import sqlite3
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-def get_db():
-    return sqlite3.connect("database.db")
+# Mock Database (In a real app, use SQLAlchemy or SQLite)
+competitions = [] # Format: [id, name]
+projects = []     # Format: {'id': 0, 'cid': 0, 'student': '', 'title': '', 'score': 0}
 
-# Create tables
-def init_db():
-    db = get_db()
-    cursor = db.cursor()
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS competition (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT
-    )
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS project (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        competition_id INTEGER,
-        student_name TEXT,
-        project_title TEXT,
-        score INTEGER DEFAULT 0
-    )
-    """)
-
-    db.commit()
-    db.close()
-
-init_db()
-
-@app.route("/")
+@app.route('/')
 def index():
-    db = get_db()
-    competitions = db.execute("SELECT * FROM competition").fetchall()
-    return render_template("index.html", competitions=competitions)
+    return render_template('index.html', competitions=enumerate([c for c in competitions]))
 
-@app.route("/create", methods=["GET", "POST"])
-def create_competition():
-    if request.method == "POST":
-        name = request.form["name"]
-        db = get_db()
-        db.execute("INSERT INTO competition (name) VALUES (?)", (name,))
-        db.commit()
-        return redirect("/")
-    return render_template("create_competition.html")
+@app.route('/create', methods=['GET', 'POST'])
+def create():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        competitions.append(name)
+        return redirect(url_for('index'))
+    return render_template('create_competition.html')
 
-@app.route("/submit/<int:cid>", methods=["GET", "POST"])
-def submit_project(cid):
-    if request.method == "POST":
-        student = request.form["student"]
-        title = request.form["title"]
+@app.route('/submit/<int:cid>', methods=['GET', 'POST'])
+def submit(cid):
+    if request.method == 'POST':
+        student = request.form.get('student')
+        title = request.form.get('title')
+        projects.append({'id': len(projects), 'cid': cid, 'student': student, 'title': title, 'score': 0})
+        return redirect(url_for('index'))
+    return render_template('submit_project.html')
 
-        db = get_db()
-        db.execute("""
-        INSERT INTO project (competition_id, student_name, project_title)
-        VALUES (?, ?, ?)
-        """, (cid, student, title))
-        db.commit()
-        return redirect("/")
-
-    return render_template("submit_project.html")
-
-@app.route("/judge/<int:cid>", methods=["GET", "POST"])
+@app.route('/judge/<int:cid>', methods=['GET', 'POST'])
 def judge(cid):
-    db = get_db()
+    if request.method == 'POST':
+        pid = int(request.form.get('pid'))
+        score = int(request.form.get('score'))
+        for p in projects:
+            if p['id'] == pid:
+                p['score'] = score
+        return redirect(url_for('judge', cid=cid))
+    
+    # Filter projects for this specific competition
+    comp_projects = [p for p in projects if p['cid'] == cid]
+    # Format for judge.html template: (id, cid, student, title, score)
+    formatted_projects = [(p['id'], p['cid'], p['student'], p['title'], p['score']) for p in comp_projects]
+    return render_template('judge.html', projects=formatted_projects)
 
-    if request.method == "POST":
-        pid = request.form["pid"]
-        score = request.form["score"]
-        db.execute("UPDATE project SET score=? WHERE id=?", (score, pid))
-        db.commit()
-
-    projects = db.execute(
-        "SELECT * FROM project WHERE competition_id=?", (cid,)
-    ).fetchall()
-
-    return render_template("judge.html", projects=projects)
-
-@app.route("/leaderboard/<int:cid>")
+@app.route('/leaderboard/<int:cid>')
 def leaderboard(cid):
-    db = get_db()
-    projects = db.execute("""
-    SELECT student_name, project_title, score
-    FROM project
-    WHERE competition_id=?
-    ORDER BY score DESC
-    """, (cid,)).fetchall()
+    # Filter and sort projects by score (descending)
+    comp_projects = [p for p in projects if p['cid'] == cid]
+    sorted_projects = sorted(comp_projects, key=lambda x: x['score'], reverse=True)
+    return render_template('leaderboard.html', projects=sorted_projects)
 
-    return render_template("leaderboard.html", projects=projects)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
