@@ -1,63 +1,48 @@
 from flask import Flask, render_template, request, redirect, url_for
+import os
 
 app = Flask(__name__)
 
-# Mock Database (In-memory storage)
-competitions = [] 
-projects = []     
+# This list starts empty and will grow as you add names
+competitions = []
 
 @app.route('/')
-def index():
-    # enumerate provides (index, competition_name)
-    return render_template('index.html', competitions=enumerate(competitions))
+def home():
+    return render_template('index.html', competitions=competitions)
 
 @app.route('/create', methods=['GET', 'POST'])
 def create():
     if request.method == 'POST':
         name = request.form.get('name')
-        if name:
-            competitions.append(name)
-        return redirect(url_for('index'))
-    return render_template('create_competition.html')
+        author = request.form.get('author')
+        
+        # Create a new dictionary for the competition
+        new_comp = {
+            "id": len(competitions) + 1,
+            "name": name,
+            "author": author,
+            "score": 0
+        }
+        competitions.append(new_comp) # This adds it dynamically
+        return redirect(url_for('home'))
+        
+    return render_template('create.html')
 
-@app.route('/submit/<int:cid>', methods=['GET', 'POST'])
-def submit(cid):
+@app.route('/judge/<int:project_id>', methods=['GET', 'POST'])
+def judge(project_id):
+    project = next((p for p in competitions if p['id'] == project_id), None)
     if request.method == 'POST':
-        student = request.form.get('student')
-        title = request.form.get('title')
-        if student and title:
-            projects.append({
-                'id': len(projects), 
-                'cid': cid, 
-                'student': student, 
-                'title': title, 
-                'score': 0
-            })
-        return redirect(url_for('index'))
-    return render_template('submit_project.html')
+        score = request.form.get('score')
+        if project:
+            project['score'] = int(score)
+        return redirect(url_for('leaderboard'))
+    return render_template('judge.html', project=project)
 
-@app.route('/judge/<int:cid>', methods=['GET', 'POST'])
-def judge(cid):
-    if request.method == 'POST':
-        pid = int(request.form.get('pid'))
-        score = int(request.form.get('score'))
-        for p in projects:
-            if p['id'] == pid:
-                p['score'] = score
-        return redirect(url_for('judge', cid=cid))
-    
-    comp_projects = [(p['id'], p['cid'], p['student'], p['title'], p['score']) 
-                     for p in projects if p['cid'] == cid]
-    return render_template('judge.html', projects=comp_projects)
-
-@app.route('/leaderboard/<int:cid>')
-def leaderboard(cid):
-    comp_projects = [p for p in projects if p['cid'] == cid]
-    sorted_projects = sorted(comp_projects, key=lambda x: x['score'], reverse=True)
-    
-    # Matches the indexing expected by your leaderboard.html
-    formatted_projects = [[p['title'], p['student'], p['score']] for p in sorted_projects]
-    return render_template('leaderboard.html', projects=formatted_projects)
+@app.route('/leaderboard')
+def leaderboard():
+    sorted_projects = sorted(competitions, key=lambda x: x['score'], reverse=True)
+    return render_template('leaderboard.html', projects=sorted_projects)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
