@@ -1,14 +1,22 @@
-<h1>Hackathon Platform</h1>
-
-<a href="/create">Create Competition</a>
-
-<ul>
-{% for c in competitions %}
-  <li>
-    {{ c[1] }}
-    | <a href="/submit/{{ c[0] }}">Submit</a>
-    | <a href="/judge/{{ c[0] }}">Judge</a>
-    | <a href="/leaderboard/{{ c[0] }}">Leaderboard</a>
-  </li>
-{% endfor %}
-</ul>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hackathon Platform</title>
+</head>
+<body>
+    <h1>Hackathon Platform</h1>
+    <a href="{{ url_for('create') }}">Create New Competition</a>
+    <hr>
+    <ul>
+        {% for c in competitions %}
+            <li>
+                <strong>{{ c.name }}</strong> (by {{ c.author }}) | 
+                <a href="{{ url_for('judge', project_id=c.id) }}">Judge</a> | 
+                <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+            </li>
+        {% else %}
+            <li>No competitions added yet. Click "Create" to add one!</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
