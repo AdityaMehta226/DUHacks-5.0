@@ -1,22 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Hackathon Platform</title>
-</head>
-<body>
-    <h1>Hackathon Platform</h1>
-    <a href="{{ url_for('create') }}">Create New Competition</a>
-    <hr>
-    <ul>
-        {% for c in competitions %}
-            <li>
-                <strong>{{ c.name }}</strong> (by {{ c.author }}) | 
-                <a href="{{ url_for('judge', project_id=c.id) }}">Judge</a> | 
-                <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
-            </li>
-        {% else %}
-            <li>No competitions added yet. Click "Create" to add one!</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+<a href="{{ url_for('create') }}">Create Competition</a>
+<ul>
+    {% for c in competitions %}
+        <li>
+            {{ c['name'] }} | 
+            <a href="{{ url_for('submit_project', cid=c['id']) }}">Submit</a> | 
+            <a href="{{ url_for('judge', cid=c['id']) }}">Judge</a> | 
+            <a href="{{ url_for('leaderboard', cid=c['id']) }}">Leaderboard</a>
+        </li>
+    {% endfor %}
+</ul>
