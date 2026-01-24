@@ -2,6 +2,8 @@
 
 <ol>
 {% for p in projects %}
-  <li>{{ p[0] }} - {{ p[1] }} - Score: {{ p[2] }}</li>
+  <li><strong>{{ p.title }}</strong> - {{ p.student }} | <b>Score: {{ p.score }}</b></li>
 {% endfor %}
 </ol>
+
+<a href="/">Back to Home</a>
