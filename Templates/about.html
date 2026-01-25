@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Credits | DU HACKS 5.0</title>
+</head>
+<body class="bg-[#F1F5F9] font-sans flex h-screen overflow-hidden">
+    <aside class="w-72 bg-[#1C2434] text-white flex flex-col p-6 shadow-2xl h-screen sticky top-0">
+        <div class="text-2xl font-black mb-12 flex items-center gap-3"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-sm"></i></div><span>DU HACKS 5.0</span></div>
+        <nav class="flex-1 space-y-2">
+            <a href="{{ url_for('index') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="#" class="flex items-center gap-4 p-4 bg-slate-800 text-white rounded-xl shadow-lg font-semibold"><i class="fas fa-code text-purple-500"></i> Credits</a>
+            <a href="{{ url_for('settings') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+        <div class="mt-auto p-4 bg-slate-800/40 rounded-2xl flex items-center gap-3 border border-slate-700/50">
+            {% if user.image_path == 'default.png' %}
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-xs border-2 border-emerald-400">{{ user.initials }}</div>
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' + user['image_path']) }}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400">
+            {% endif %}
+            <div class="text-xs"><p class="font-bold truncate w-32">{{ user['username'] }}</p><p class="text-gray-500 capitalize">{{ user['post'] }}</p></div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col items-center p-12 overflow-y-auto bg-gray-50/50">
+        <div class="max-w-4xl w-full text-center">
+            <header class="mb-12">
+                <h1 class="text-4xl font-black text-slate-800 uppercase italic tracking-tighter">Behind the Code</h1>
+                <div class="h-1 w-20 bg-blue-600 mx-auto mt-4 rounded-full"></div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-[2.5rem] shadow-xl border p-8 hover:shadow-2xl transition">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-code text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800">ADITYA MEHTA</h3>
+                    <p class="text-blue-600 font-bold uppercase text-[10px] tracking-widest mt-2">Backend-Developer</p>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-xl border p-8 hover:shadow-2xl transition">
+                    <div class="w-20 h-20 bg-purple-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-terminal text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800">VATSAL MALAVIYA</h3>
+                    <p class="text-purple-600 font-bold uppercase text-[10px] tracking-widest mt-2">Backend-Developer</p>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-xl border p-8 hover:shadow-2xl transition">
+                    <div class="w-20 h-20 bg-emerald-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-laptop-code text-emerald-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800">HETVI KHAKHAR</h3>
+                    <p class="text-emerald-600 font-bold uppercase text-[10px] tracking-widest mt-2">Frontend-Developer</p>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-xl border p-8 hover:shadow-2xl transition">
+                    <div class="w-20 h-20 bg-amber-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-database text-amber-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800">SHRUSHTI THUMMAR</h3>
+                    <p class="text-amber-600 font-bold uppercase text-[10px] tracking-widest mt-2">Frontend-Developer</p>
+                </div>
+            </div>
+            
+            <p class="mt-12 text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">© 2026 Dharmsinh Desai University | All Rights Reserved</p>
+        </div>
+    </main>
+</body>
+</html>

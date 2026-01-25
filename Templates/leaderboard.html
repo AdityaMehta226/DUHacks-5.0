@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Standings | {{ comp_name }}</title>
+</head>
+<body class="bg-[#F1F5F9] font-sans flex h-screen overflow-hidden">
+    <aside class="w-72 bg-[#1C2434] text-white flex flex-col p-6 shadow-2xl h-screen sticky top-0">
+        <div class="text-2xl font-black mb-12 flex items-center gap-3"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-sm"></i></div><span>DU HACKS 5.0</span></div>
+        <nav class="flex-1 space-y-2">
+            <a href="{{ url_for('index') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="#" class="flex items-center gap-4 p-4 bg-slate-800 text-white rounded-xl shadow-lg font-semibold"><i class="fas fa-trophy text-green-500"></i> Results</a>
+            <a href="{{ url_for('about') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-code"></i> Credits</a>
+        </nav>
+        <div class="mt-auto p-4 bg-slate-800/40 rounded-2xl flex items-center gap-3 border border-slate-700/50">
+            {% if user.image_path == 'default.png' %}
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-xs border-2 border-emerald-400">{{ user.initials }}</div>
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' + user['image_path']) }}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400">
+            {% endif %}
+            <div class="text-xs"><p class="font-bold truncate w-32">{{ user['username'] }}</p><p class="text-gray-500 capitalize">{{ user['post'] }}</p></div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-12">
+        <header class="mb-10"><h1 class="text-3xl font-black text-slate-800 uppercase tracking-tighter">{{ comp_name }} Rankings</h1></header>
+        
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 mb-10">
+            <h3 class="text-sm font-black text-gray-400 uppercase mb-6 tracking-widest">Score Distribution</h3>
+            <div class="h-64"><canvas id="rankingChart"></canvas></div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-[#1C2434] text-white uppercase text-xs font-black tracking-widest">
+                    <tr><th class="p-6">Rank</th><th class="p-6">Name</th><th class="p-6">Project</th><th class="p-6 text-right">Points</th></tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for p in projects %}
+                    <tr class="hover:bg-blue-50 transition">
+                        <td class="p-6">
+                            <span class="w-10 h-10 rounded-full flex items-center justify-center font-black text-white shadow-md
+                                {% if loop.index == 1 %}bg-yellow-400{% elif loop.index == 2 %}bg-slate-300{% elif loop.index == 3 %}bg-amber-600{% else %}bg-slate-200 text-slate-700{% endif %}">
+                                {{ loop.index }}
+                            </span>
+                        </td>
+                        <td class="p-6 font-black text-slate-800">{{ p['student_name'] }}</td>
+                        <td class="p-6 italic text-gray-400 uppercase text-xs">{{ p['project_title'] }}</td>
+                        <td class="p-6 text-right font-black text-2xl text-blue-600">{{ p['score'] }}<span class="text-[10px] text-gray-300 ml-1">pts</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const ctx = document.getElementById('rankingChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{% for p in projects[:10] %}"{{ p['student_name'] }}",{% endfor %}],
+                datasets: [{
+                    label: 'Score',
+                    data: [{% for p in projects[:10] %}{{ p['score'] }},{% endfor %}],
+                    backgroundColor: '#2563eb',
+                    borderRadius: 10,
+                }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    </script>
+</body>
+</html>

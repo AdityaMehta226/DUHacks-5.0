@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Settings | DUHACKS 5.0</title>
+</head>
+<body class="bg-[#F1F5F9] font-sans flex h-screen overflow-hidden">
+    <aside class="w-72 bg-[#1C2434] text-white flex flex-col p-6 shadow-2xl h-screen sticky top-0">
+        <div class="group flex items-center gap-4 mb-12 cursor-default">
+            <div class="relative w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform"><i class="fas fa-layer-group text-white text-xl"></i></div>
+            <div><h2 class="text-xl font-black text-white uppercase tracking-tighter mb-1 leading-none">DUHACKS 5.0</h2><p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest leading-none">Innovation Hub</p></div>
+        </div>
+        <nav class="flex-1 space-y-2">
+            <a href="{{ url_for('index') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="{{ url_for('about') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-code"></i> Credits</a>
+            <a href="#" class="flex items-center gap-4 p-4 bg-slate-800 text-white rounded-xl shadow-lg font-semibold"><i class="fas fa-cog text-blue-500"></i> Settings</a>
+        </nav>
+        <div class="mt-auto p-4 bg-slate-800/40 rounded-2xl flex items-center gap-3 border border-slate-700/50">
+            {% if user.image_path == 'default.png' %}
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-[10px] border-2 border-emerald-400">{{ user.initials }}</div>
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' + user['image_path']) }}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400">
+            {% endif %}
+            <div class="text-xs"><p class="font-bold truncate w-32">{{ user['username'] }}</p><p class="text-gray-500 capitalize">{{ user['post'] }}</p></div>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-12 overflow-y-auto">
+        <header class="mb-10 text-center md:text-left"><h1 class="text-3xl font-black text-slate-800 uppercase tracking-tighter">Profile Settings</h1></header>
+
+        <div class="max-w-2xl bg-white rounded-[2.5rem] shadow-xl p-10 border border-gray-100 mx-auto md:mx-0">
+            
+            <div class="flex flex-col md:flex-row items-center gap-8 p-6 bg-slate-50 rounded-3xl border border-dashed border-slate-200 mb-8">
+                <div id="imageContainer" class="relative group">
+                    <img id="previewImg" src="#" class="hidden w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
+
+                    {% if user.image_path == 'default.png' %}
+                        <div id="initialsContainer" class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center font-black text-2xl text-white shadow-lg border-4 border-white">{{ user.initials }}</div>
+                    {% else %}
+                        <img id="currentImg" src="{{ url_for('static', filename='uploads/' + user['image_path']) }}" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
+                        <button type="submit" form="deleteForm" class="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center backdrop-blur-sm shadow-xl"><i class="fas fa-trash-alt text-xl"></i></button>
+                    {% endif %}
+                </div>
+                
+                <div class="flex-1 text-center md:text-left">
+                    <label class="text-[10px] font-black text-gray-400 uppercase mb-3 block tracking-widest">Update Identity Photo</label>
+                    <input type="file" name="profile_pic" form="mainSettingsForm" accept="image/*" onchange="previewImage(event)" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white cursor-pointer transition">
+                </div>
+            </div>
+            
+            <form id="mainSettingsForm" action="{{ url_for('settings') }}" method="post" enctype="multipart/form-data" class="space-y-8">
+                <div class="grid gap-6">
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest ml-1">Full Name</label>
+                        <input type="text" name="username" value="{{ user['username'] }}" required class="w-full px-6 py-4 bg-gray-50 border rounded-2xl font-semibold outline-none focus:border-blue-500 transition">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest ml-1">Role / Post</label>
+                        <input type="text" name="post" value="{{ user['post'] }}" required class="w-full px-6 py-4 bg-gray-50 border rounded-2xl font-semibold outline-none focus:border-blue-500 transition">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase shadow-xl transition active:scale-95 hover:bg-blue-700">Save Changes</button>
+            </form>
+
+            <form id="deleteForm" action="{{ url_for('remove_pic') }}" method="post" class="hidden"></form>
+        </div>
+    </main>
+
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('previewImg');
+                    const initials = document.getElementById('initialsContainer');
+                    const current = document.getElementById('currentImg');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    if (initials) initials.classList.add('hidden');
+                    if (current) current.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>

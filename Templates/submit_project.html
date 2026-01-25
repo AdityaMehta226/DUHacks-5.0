@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Submit | {{ comp_name }}</title>
+</head>
+<body class="bg-[#F1F5F9] font-sans flex h-screen overflow-hidden">
+    <aside class="w-72 bg-[#1C2434] text-white flex flex-col p-6 shadow-2xl h-screen sticky top-0">
+        <div class="text-2xl font-black mb-12 flex items-center gap-3"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-sm"></i></div><span>DU HACKS 5.0</span></div>
+        <nav class="flex-1 space-y-2">
+            <a href="{{ url_for('index') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="#" class="flex items-center gap-4 p-4 bg-slate-800 text-white rounded-xl shadow-lg font-semibold"><i class="fas fa-upload text-blue-500"></i> Submit Entry</a>
+            <a href="{{ url_for('about') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-code"></i> Credits</a>
+        </nav>
+        <div class="mt-auto p-4 bg-slate-800/40 rounded-2xl flex items-center gap-3 border border-slate-700/50">
+            {% if user.image_path == 'default.png' %}
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-xs border-2 border-emerald-400">{{ user.initials }}</div>
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' + user['image_path']) }}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400">
+            {% endif %}
+            <div class="text-xs"><p class="font-bold truncate w-32">{{ user['username'] }}</p><p class="text-gray-500 capitalize">{{ user['post'] }}</p></div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-12 bg-gray-50/50">
+        <div class="w-full max-w-lg">
+            <div class="bg-white rounded-[3rem] shadow-2xl border p-12 text-center mb-8">
+                <h3 class="text-2xl font-black text-slate-800 mb-8 uppercase italic tracking-tighter">Register New Entry</h3>
+                <form action="{{ url_for('submit_project', cid=cid) }}" method="post" enctype="multipart/form-data" class="space-y-6 text-left">
+                    <input type="text" name="student" placeholder="Participant Name" class="w-full px-6 py-4 bg-gray-50 border rounded-2xl font-semibold outline-none focus:border-blue-500 transition" required>
+                    <input type="text" name="title" placeholder="Project Title" class="w-full px-6 py-4 bg-gray-50 border rounded-2xl font-semibold outline-none focus:border-blue-500 transition" required>
+                    
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-gray-400 block mb-2 ml-1">Submission Type</label>
+                        <select name="submission_type" id="subType" onchange="toggleForm()" class="w-full px-6 py-4 bg-gray-50 border rounded-2xl font-semibold cursor-pointer">
+                            <option value="link">Public Link (GitHub/URL)</option>
+                            <option value="folder">Project Folder (Local)</option>
+                        </select>
+                    </div>
+
+                    <div id="linkArea">
+                        <input type="url" name="project_link" placeholder="https://github.com/..." class="w-full px-6 py-4 bg-gray-50 border rounded-2xl font-semibold">
+                    </div>
+
+                    <div id="folderArea" class="hidden">
+                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fas fa-folder-open text-blue-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-bold text-gray-600">Click to upload folder</p>
+                            </div>
+                            <input type="file" name="project_folder" webkitdirectory directory multiple class="hidden">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-100 uppercase transition active:scale-95">Save Entry</button>
+                </form>
+            </div>
+            <a href="{{ url_for('index') }}" class="flex items-center justify-center gap-2 text-slate-400 hover:text-slate-600 font-bold uppercase text-xs transition"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </main>
+    <script>function toggleForm() { const val = document.getElementById('subType').value; document.getElementById('linkArea').classList.toggle('hidden', val !== 'link'); document.getElementById('folderArea').classList.toggle('hidden', val !== 'folder'); }</script>
+</body>
+</html>

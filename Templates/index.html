@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Dashboard | DU HACKS 5.0</title>
+</head>
+<body class="bg-[#F1F5F9] font-sans flex h-screen overflow-hidden">
+    <aside class="w-72 bg-[#1C2434] text-white flex flex-col p-6 shadow-2xl h-screen sticky top-0">
+        <div class="text-2xl font-black mb-12 flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-sm"></i></div>
+            <span>DU HACKS 5.0</span>
+        </div>
+        <nav class="flex-1 space-y-2">
+            <a href="{{ url_for('index') }}" class="flex items-center gap-4 p-4 bg-slate-800 text-white rounded-xl shadow-lg font-semibold"><i class="fas fa-chart-pie text-blue-500"></i> Dashboard</a>
+            <a href="{{ url_for('about') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-code"></i> Credits</a>
+            <a href="{{ url_for('settings') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+        
+        <div class="mt-auto p-4 bg-slate-800/40 rounded-2xl flex items-center gap-3 border border-slate-700/50">
+            {% if user.image_path == 'default.png' %}
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-xs border-2 border-emerald-400">
+                    {{ user.initials }}
+                </div>
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' + user['image_path']) }}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400">
+            {% endif %}
+            <div class="text-xs"><p class="font-bold truncate w-32">{{ user['username'] }}</p><p class="text-gray-500 capitalize">{{ user['post'] }}</p></div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-12">
+        <header class="mb-10 text-center">
+            <h1 class="text-3xl font-black text-slate-800 uppercase italic">Event Dashboard</h1>
+            <p class="text-gray-400 text-sm font-medium">Create and manage active Hackathon Leaderboard</p>
+        </header>
+        
+        <section class="mb-12 max-w-4xl mx-auto">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-black text-slate-800 mb-4 uppercase">Launch Competition</h3>
+                <form action="{{ url_for('create') }}" method="post" class="flex gap-4">
+                    <input type="text" name="name" placeholder="Name (e.g., IoT Hackathon)" class="flex-1 px-6 py-4 bg-gray-50 border rounded-2xl outline-none focus:border-blue-500 font-semibold" required>
+                    <button class="bg-blue-600 text-white px-10 rounded-2xl font-bold shadow-lg shadow-blue-100 uppercase transition active:scale-95">Create</button>
+                </form>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {% for c in competitions %}
+            <div class="bg-white rounded-[2.5rem] shadow-sm border p-8 hover:shadow-xl transition">
+                <div class="flex justify-between items-start mb-6">
+                    <h4 class="text-2xl font-black text-slate-800 uppercase">{{ c['name'] }}</h4>
+                    <form action="{{ url_for('delete_competition', cid=c['id']) }}" method="post" onsubmit="return confirm('Delete event?');">
+                        <button class="text-gray-300 hover:text-red-500 transition"><i class="fas fa-trash-alt"></i></button>
+                    </form>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <a href="{{ url_for('submit_project', cid=c['id']) }}" class="flex flex-col items-center p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 transition"><i class="fas fa-upload text-lg"></i><span class="text-[10px] font-black uppercase mt-1">Submit</span></a>
+                    <a href="{{ url_for('judge', cid=c['id']) }}" class="flex flex-col items-center p-4 bg-slate-50 rounded-2xl hover:bg-amber-50 transition"><i class="fas fa-gavel text-lg"></i><span class="text-[10px] font-black uppercase mt-1">Judge</span></a>
+                    <a href="{{ url_for('leaderboard', cid=c['id']) }}" class="flex flex-col items-center p-4 bg-slate-50 rounded-2xl hover:bg-green-50 transition"><i class="fas fa-medal text-lg"></i><span class="text-[10px] font-black uppercase mt-1">Results</span></a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

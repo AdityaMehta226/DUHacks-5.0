@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Judge Panel | {{ comp_name }}</title>
+</head>
+<body class="bg-[#F1F5F9] font-sans flex h-screen overflow-hidden">
+    <aside class="w-72 bg-[#1C2434] text-white flex flex-col p-6 shadow-2xl h-screen sticky top-0">
+        <div class="text-2xl font-black mb-12 flex items-center gap-3"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-sm"></i></div><span>DU HACKS 5.0</span></div>
+        <nav class="flex-1 space-y-2">
+            <a href="{{ url_for('index') }}" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-slate-800 hover:text-white rounded-xl transition font-semibold"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="#" class="flex items-center gap-4 p-4 bg-slate-800 text-white rounded-xl shadow-lg font-semibold"><i class="fas fa-gavel text-blue-500"></i> Judge View</a>
+            <a href="{{ url_for('leaderboard', cid=cid) }}" class="flex items-center gap-4 p-4 hover:bg-slate-800 rounded-xl transition font-semibold text-gray-400"><i class="fas fa-trophy"></i> Results</a>
+        </nav>
+        
+        <div class="mt-auto p-4 bg-slate-800/40 rounded-2xl flex items-center gap-3 border border-slate-700/50">
+            {% if user.image_path == 'default.png' %}
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-xs border-2 border-emerald-400">
+                    {{ user.initials }}
+                </div>
+            {% else %}
+                <img src="{{ url_for('static', filename='uploads/' + user['image_path']) }}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400">
+            {% endif %}
+            <div class="text-xs"><p class="font-bold truncate w-32">{{ user['username'] }}</p><p class="text-gray-500 capitalize">{{ user['post'] }}</p></div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-12">
+        <header class="mb-10 flex justify-between items-start">
+            <div><h1 class="text-3xl font-black text-slate-800 uppercase tracking-tighter">Review Submissions</h1><p class="text-blue-600 font-bold italic uppercase tracking-widest text-xs">{{ comp_name }}</p></div>
+            <a href="{{ url_for('download_all', cid=cid) }}" class="bg-slate-800 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase shadow-xl hover:bg-slate-900 transition flex items-center gap-3"><i class="fas fa-file-archive text-lg"></i> Bulk Download</a>
+        </header>
+
+        <div class="grid gap-6">
+            {% for p in projects %}
+            <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+                <details class="group">
+                    <summary class="flex justify-between items-center p-8 cursor-pointer list-none">
+                        <div><h3 class="text-xl font-black text-slate-800 uppercase italic">{{ p.student_name }}</h3><p class="text-blue-600 font-bold text-xs uppercase">{{ p.project_title }}</p></div>
+                        <i class="fas fa-chevron-down text-gray-300 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="p-8 border-t bg-slate-50/50">
+                        {% if p.submission_type == 'link' %}
+                            <div class="flex gap-2 mb-6"><input type="text" readonly value="{{ p.submission_content }}" id="link_{{ p.id }}" class="flex-1 bg-white border p-4 rounded-xl text-sm font-semibold"><button onclick="copy('link_{{ p.id }}')" class="bg-blue-600 text-white px-6 rounded-xl font-black text-[10px] uppercase">Copy</button></div>
+                        {% else %}
+                            <div class="bg-white border rounded-xl p-6 mb-6 max-h-48 overflow-y-auto">
+                                <label class="text-[10px] font-black uppercase text-gray-400 block mb-3 tracking-widest">Files inside folder:</label>
+                                {% for file in p.files %}<div class="text-xs font-semibold text-slate-600 mb-2 flex items-center gap-2"><i class="far fa-file-code text-blue-500"></i>{{ file }}</div>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <form method="post" class="flex items-center gap-4">
+                            <input type="hidden" name="pid" value="{{ p.id }}">
+                            <div class="flex-1 flex gap-2">
+                                <input type="number" name="score" value="{{ p.score }}" class="w-24 p-4 border rounded-2xl text-center font-black outline-none focus:border-blue-500">
+                                <button class="bg-green-500 text-white font-black py-4 px-8 rounded-2xl shadow-lg transition active:scale-95 uppercase text-xs">Update Score</button>
+                            </div>
+                        </form>
+                        <form action="{{ url_for('disqualify', pid=p.id) }}" method="post" class="mt-6 border-t pt-4" onsubmit="return confirm('Disqualify student?');">
+                            <button type="submit" class="text-gray-400 hover:text-red-500 font-black text-[10px] uppercase transition flex items-center gap-2"><i class="fas fa-user-slash"></i> Disqualify Student</button>
+                        </form>
+                    </div>
+                </details>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+    <script>function copy(id) { const el = document.getElementById(id); el.select(); document.execCommand("copy"); alert("Link Copied!"); }</script>
+</body>
+</html>
