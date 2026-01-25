@@ -1,7 +1,0 @@
-<h1>Leaderboard</h1>
-<ol>
-    {% for p in projects %}
-        <li>{{ p['student_name'] }} - {{ p['project_title'] }} | <strong>Score: {{ p['score'] }}</strong></li>
-    {% endfor %}
-</ol>
-<a href="{{ url_for('index') }}">Back to Home</a>
